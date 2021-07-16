@@ -13,7 +13,7 @@ Font_Suffix="\033[0m";
 LOG_FILE="speedtest_result.log";
 
 Check(){
-    [[ $EUID -ne 0 ]] && echo -e "${RED}请使用 root 用户运行本脚本！${PLAIN}" && exit 1
+    [[ $EUID -ne 0 ]] && echo -e "${RED}请使用 root 用户运行本脚本！${Font_Suffix}" && exit 1
     
     if [ -f /etc/redhat-release ]; then
         release="centos"
@@ -64,34 +64,31 @@ Speedtest(){
         local reupload=$(cat $TempLog | awk -F ' ' '/Upload/{print $3}')
         local relatency=$(cat $TempLog | awk -F ' ' '/Latency/{print $2}')
         
-        local nodeID=$1
-        local nodeLocation=$2
+        local nodeID="$1      "
+        local nodeLocation="$2　　　　　　"
         local nodeISP=$3
-        
-        strnodeLocation="${nodeLocation}　　　　　　"
+
         LANG=C
         
         temp=$(echo "${REDownload}" | awk -F ' ' '{print $1}')
-        if [[ $(awk -v num1=${temp} -v num2=0 'BEGIN{print(num1>num2)?"1":"0"}') -eq 1 ]]; then
-            echo -e "${Font_Red}${nodeID} ${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${strnodeLocation:0:24}${Font_SkyBlue}↑ ${reupload} ${Font_Blue}↓ ${REDownload} ${Font_Pueple}${relatency}${Font_Suffix}"
-        fi
+        echo -e "${Font_Red}${nodeID:0:6} ${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${reupload} ${Font_Blue}↓ ${REDownload} ${Font_Pueple}${relatency}${Font_Suffix}"
     else
         local cerror="ERROR"
     fi
 }
 
 Menu() {
-	echo "Speedtest by Ookla"
-	echo "项目地址 https://github.com/CoiaPrant/Speedtest"
+    echo "Speedtest by Ookla"
+    echo "项目地址 https://github.com/CoiaPrant/Speedtest"
     echo "全部节点列表:  https://git.io/superspeedList"
     echo "——————————————————————————————————————————————————————————"
     
-    echo -e "  测速类型:    ${GREEN}1.${PLAIN} 三网测速    ${GREEN}2.${PLAIN} 取消测速"
-    echo -ne "               ${GREEN}3.${PLAIN} 电信节点    ${GREEN}4.${PLAIN} 联通节点    ${GREEN}5.${PLAIN} 移动节点"
+    echo -e "  测速类型:    ${Font_Green}1.${Font_Suffix} 三网测速    ${Font_Green}2.${Font_Suffix} 取消测速"
+    echo -ne "               ${Font_Green}3.${Font_Suffix} 电信节点    ${Font_Green}4.${Font_Suffix} 联通节点    ${Font_Green}5.${Font_Suffix} 移动节点"
     while :; do echo
         read -p "  请输入数字选择测速类型: " selection
         if [[ ! $selection =~ ^[1-5]$ ]]; then
-            echo -ne "  ${RED}输入错误${PLAIN}, 请输入正确的数字!"
+            echo -ne "  ${RED}输入错误${Font_Suffix}, 请输入正确的数字!"
         else
             break
         fi
@@ -102,6 +99,7 @@ Menu() {
     echo "ID    测速服务器信息       上传/Mbps   下载/Mbps   延迟/ms"
     
     if [[ ${selection} == 1 ]]; then
+        Speedtest '' '默认' '本地'
         Test_CT;
         Test_CU;
         Test_CM;
