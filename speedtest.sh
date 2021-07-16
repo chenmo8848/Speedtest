@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-
-# Colors
 Font_Black="\033[30m";
 Font_Red="\033[31m";
 Font_Green="\033[32m";
@@ -60,9 +58,9 @@ Speedtest(){
     
     is_upload=$(cat $TempLog | grep 'Upload')
     if [[ ${is_upload} ]]; then
-        local REDownload=$(cat $TempLog | awk -F ' ' '/Download/{print $3}')
-        local reupload=$(cat $TempLog | awk -F ' ' '/Upload/{print $3}')
-        local relatency=$(cat $TempLog | awk -F ' ' '/Latency/{print $2}')
+        local Download="$(cat $TempLog | awk -F ' ' '/Download/{print $3}')          "
+        local Upload="$(cat $TempLog | awk -F ' ' '/Upload/{print $3}')          "
+        local Relatency=$(cat $TempLog | awk -F ' ' '/Latency/{print $2}')
         
         local nodeID="$1      "
         local nodeLocation="$2　　　　　　"
@@ -71,7 +69,7 @@ Speedtest(){
         LANG=C
         
         temp=$(echo "${REDownload}" | awk -F ' ' '{print $1}')
-        echo -e "${Font_Red}${nodeID:0:6} ${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${reupload} ${Font_Blue}↓ ${REDownload} ${Font_Pueple}${relatency}${Font_Suffix}"
+        echo -e "${Font_Red}${nodeID:0:6}${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${Upload:0:10} ${Font_Blue}↓ ${Download:0:10} ${Font_Pueple}${Relatency}${Font_Suffix}"
     else
         local cerror="ERROR"
     fi
@@ -88,7 +86,7 @@ Menu() {
     while :; do echo
         read -p "  请输入数字选择测速类型: " selection
         if [[ ! $selection =~ ^[1-5]$ ]]; then
-            echo -ne "  ${RED}输入错误${Font_Suffix}, 请输入正确的数字!"
+            echo -ne "  ${Font_Red}输入错误${Font_Suffix}, 请输入正确的数字!"
         else
             break
         fi
