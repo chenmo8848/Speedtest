@@ -80,7 +80,7 @@ checkspeedtest() {
 }
 
 speed_test(){
-	speedLog="./speedtest.log"
+	speedLog="./speedtest_temp.log"
 	true > $speedLog
 		speedtest-cli/speedtest -p no -s $1 --accept-license > $speedLog 2>&1
 		is_upload=$(cat $speedLog | grep 'Upload')
@@ -95,11 +95,10 @@ speed_test(){
 			
 			strnodeLocation="${nodeLocation}　　　　　　"
 			LANG=C
-			#echo $LANG
 			
 			temp=$(echo "${REDownload}" | awk -F ' ' '{print $1}')
 	        if [[ $(awk -v num1=${temp} -v num2=0 'BEGIN{print(num1>num2)?"1":"0"}') -eq 1 ]]; then
-	        	printf "${RED}%-6s${YELLOW}%s%s${GREEN}%-24s${CYAN}%s%-10s${BLUE}%s%-10s${PURPLE}%-8s${PLAIN}\n" "${nodeID}"  "${nodeISP}" "|" "${strnodeLocation:0:24}" "↑ " "${reupload}" "↓ " "${REDownload}" "${relatency}" | tee -a $log
+	        	echo -e "${RED}%-6s${YELLOW}%s%s${GREEN}%-24s${CYAN}%s%-10s${BLUE}%s%-10s${PURPLE}%-8s${PLAIN}\n" "${nodeID}"  "${nodeISP}" "|" "${strnodeLocation:0:24}" "↑ " "${reupload}" "↓ " "${REDownload}" "${relatency}" | tee -a $log
 			fi
 		else
 	        local cerror="ERROR"
@@ -228,19 +227,6 @@ runtest() {
 
 		end=$(date +%s)  
 		rm -rf speedtest*
-		echo "——————————————————————————————————————————————————————————"
-		time=$(( $end - $start ))
-		if [[ $time -gt 60 ]]; then
-			min=$(expr $time / 60)
-			sec=$(expr $time % 60)
-			echo -ne "  测试完成, 本次测速耗时: ${min} 分 ${sec} 秒"
-		else
-			echo -ne "  测试完成, 本次测速耗时: ${time} 秒"
-		fi
-		echo -ne "\n  当前时间: "
-		echo $(date +%Y-%m-%d" "%H:%M:%S)
-		echo -e "  ${GREEN}# 三网测速中为避免节点数不均及测试过久，每部分未使用所${PLAIN}"
-		echo -e "  ${GREEN}# 有节点，如果需要使用全部节点，可分别选择三网节点检测${PLAIN}"
 	fi
 
 	if [[ ${selection} == 3 ]]; then
@@ -313,17 +299,7 @@ runtest() {
 
 		end=$(date +%s)  
 		rm -rf speedtest*
-		echo "——————————————————————————————————————————————————————————"
-		time=$(( $end - $start ))
-		if [[ $time -gt 60 ]]; then
-			min=$(expr $time / 60)
-			sec=$(expr $time % 60)
-			echo -ne "  测试完成, 本次测速耗时: ${min} 分 ${sec} 秒"
-		else
-			echo -ne "  测试完成, 本次测速耗时: ${time} 秒"
-		fi
-		echo -ne "\n  当前时间: "
-		echo $(date +%Y-%m-%d" "%H:%M:%S)
+		
 	fi
 
 	if [[ ${selection} == 5 ]]; then
@@ -383,14 +359,7 @@ runtest() {
 		end=$(date +%s)  
 		rm -rf speedtest*
 		echo "——————————————————————————————————————————————————————————"
-		time=$(( $end - $start ))
-		if [[ $time -gt 60 ]]; then
-			min=$(expr $time / 60)
-			sec=$(expr $time % 60)
-			echo -ne "  测试完成, 本次测速耗时: ${min} 分 ${sec} 秒"
-		else
-			echo -ne "  测试完成, 本次测速耗时: ${time} 秒"
-		fi
+		
 		echo -ne "\n  当前时间: "
 		echo $(date +%Y-%m-%d" "%H:%M:%S)
 	fi
