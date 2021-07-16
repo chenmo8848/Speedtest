@@ -32,17 +32,32 @@ Check(){
     if  [ ! -e '/usr/bin/wget' ]; then
         echo "正在安装 Wget"
         if [ "${release}" == "centos" ]; then
-            yum update > /dev/null 2>&1
+            yum -y makecache > /dev/null 2>&1
             yum -y install wget > /dev/null 2>&1
         else
-            apt-get update > /dev/null 2>&1
+            apt-get -y update > /dev/null 2>&1
             apt-get -y install wget > /dev/null 2>&1
+        fi
+    fi
+    
+    if  [ ! -e '/usr/bin/jq' ]; then
+        echo "正在安装 JQ"
+        if [ "${release}" == "centos" ]; then
+            yum -y makecache > /dev/null 2>&1
+            yum -y install epel-release > /dev/null 2>&1
+            yum -y install jq > /dev/null 2>&1
+        else
+            apt-get update > /dev/null 2>&1
+            apt-get -y install jq > /dev/null 2>&1
         fi
     fi
     
     if  [ ! -e './speedtest-cli/speedtest' ]; then
         echo "正在安装 Speedtest-cli"
-        wget --no-check-certificate -qO speedtest.tgz "https://install.speedtest.net/app/cli/ookla-speedtest-1.0.0-$(uname -m)-linux.tgz" > /dev/null 2>&1
+        wget --no-check-certificate -4qO speedtest.tgz "https://install.speedtest.net/app/cli/ookla-speedtest-1.0.0-$(uname -m)-linux.tgz" > /dev/null 2>&1
+        if [ $? -ne 0 ];then
+            echo "Speedtest-cli 安装失败" && exit 1
+        fi
     fi
     mkdir -p speedtest-cli && tar zxvf speedtest.tgz -C ./speedtest-cli/ > /dev/null 2>&1 && chmod a+rx ./speedtest-cli/speedtest
 }
@@ -65,20 +80,40 @@ Speedtest(){
         local nodeID="$1      "
         local nodeLocation="$2　　　　　　"
         local nodeISP=$3
-
-        LANG=C
         
-        temp=$(echo "${REDownload}" | awk -F ' ' '{print $1}')
-        echo -e "${Font_Red}${nodeID:0:6}${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${Upload:0:10} ${Font_Blue}↓ ${Download:0:10} ${Font_Pueple}${Relatency}${Font_Suffix}"
+        echo -e "${Font_Red}${nodeID:0:6}${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${Upload:0:10}${Font_Blue}↓ ${Download:0:10}${Font_Pueple}${Relatency}${Font_Suffix}" && echo "${nodeID:0:6}${nodeISP}|${nodeLocation:0:24}↑ ${Upload:0:10}↓ ${Download:0:10}${Relatency}" >> ${LOG_FILE}
     else
         local cerror="ERROR"
     fi
 }
 
+PharseJSON() {
+    # 使用方法: PharseJSON "要解析的原JSON文本" "要解析的键值"
+    # Example: PharseJSON ""Value":"123456"" "Value" [返回结果: 123456]
+    echo -n $1 | jq -r .$2;
+}
+
+ISP() {
+    LANG=C
+    local result=`curl -4sSL "https://api.ip.sb/geoip" 2>&1`;
+    if [[ "$result" == "curl"* ]];then
+        return
+    fi
+    local ip=$(PharseJSON "${result}" "ip" 2>&1)
+    local isp="$(PharseJSON "${result}" "isp" 2>&1) [$(PharseJSON "${result}" "country" 2>&1) $(PharseJSON "${result}" "city" 2>&1)]";
+    if [ $? -eq 0 ];then
+        echo "IP: ${ip}"
+        echo "ISP: ${isp}" && echo -e "ISP: ${isp}" >> ${LOG_FILE};
+    fi
+}
+
 Menu() {
-    echo "Speedtest by Ookla"
-    echo "项目地址 https://github.com/CoiaPrant/Speedtest"
-    echo "全部节点列表:  https://git.io/superspeedList"
+    echo "Speedtest by Ookla" && echo "Speedtest by Ookla" > ${LOG_FILE}
+    echo "项目地址 https://github.com/CoiaPrant/Speedtest" && echo "项目地址 https://github.com/CoiaPrant/Speedtest" >> ${LOG_FILE}
+    echo "全部节点列表:  https://git.io/superspeedList" && echo "全部节点列表:  https://git.io/superspeedList" >> ${LOG_FILE}
+    echo "——————————————————————————————————————————————————————————" && echo "——————————————————————————————————————————————————————————" >> ${LOG_FILE}
+    echo "系统时间: $(date)" && echo "系统时间: $(date)" >> ${LOG_FILE}
+    ISP;
     echo "——————————————————————————————————————————————————————————"
     
     echo -e "  测速类型:    ${Font_Green}1.${Font_Suffix} 三网测速    ${Font_Green}2.${Font_Suffix} 取消测速"
@@ -92,9 +127,9 @@ Menu() {
         fi
     done
     
-    [[ ${selection} == 2 ]] && exit 1
-    echo "——————————————————————————————————————————————————————————"
-    echo "ID    测速服务器信息       上传/Mbps   下载/Mbps   延迟/ms"
+    [[ ${selection} == 2 ]] && Clean && exit 1
+    echo "——————————————————————————————————————————————————————————" && echo "——————————————————————————————————————————————————————————" >> ${LOG_FILE}
+    echo "ID    测速服务器信息       上传/Mbps   下载/Mbps   延迟/ms" && echo "ID    测速服务器信息       上传/Mbps   下载/Mbps   延迟/ms" >> ${LOG_FILE}
     
     if [[ ${selection} == 1 ]]; then
         Speedtest '' '默认' '本地'
@@ -115,9 +150,9 @@ Menu() {
         Test_CM;
     fi
     
-    rm -rf speedtest*
     echo "——————————————————————————————————————————————————————————"
-    
+    cat ${LOG_FILE} | PasteBin_Upload;
+    Clean;
 }
 
 Test_CT() {
@@ -216,6 +251,26 @@ Test_CM() {
     Speedtest '29105' '陕西西安５Ｇ' '移动'
     Speedtest '29083' '青海西宁５Ｇ' '移动'
     Speedtest '26656' '黑龙江哈尔滨' '移动'
+}
+
+Clean() {
+    rm -rf speedtest*
+}
+
+PasteBin_Upload() {
+    local uploadresult="$(curl -fsL -X POST \
+        --url https://paste.ubuntu.com \
+        --output /dev/null \
+        --write-out "%{url_effective}\n" \
+        --data-urlencode "content@${PASTEBIN_CONTENT:-/dev/stdin}" \
+        --data "poster=${PASTEBIN_POSTER:-Speedtest_By_CoiaPrant}" \
+        --data "expiration=${PASTEBIN_EXPIRATION:-}" \
+    --data "syntax=${PASTEBIN_SYNTAX:-text}")"
+    if [ "$?" = "0" ]; then
+        echo -e "${Font_Green}已生成报告 ${uploadresult} ${Font_Suffix}";
+    else
+        echo -e "${Font_Red}生成报告失败 ${Font_Suffix}";
+    fi
 }
 
 Check;
