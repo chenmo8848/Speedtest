@@ -81,7 +81,7 @@ Speedtest(){
         local nodeLocation="$2　　　　　　"
         local nodeISP=$3
         
-        echo -e "${Font_Red}${nodeID:0:6}${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${Upload:0:10}${Font_Blue}↓ ${Download:0:10}${Font_Pueple}${Relatency}${Font_Suffix}" && echo "${nodeID:0:6}${nodeISP}|${nodeLocation:0:24}↑ ${Upload:0:10}↓ ${Download:0:10}${Relatency}" >> ${LOG_FILE}
+        echo -e "${Font_Red}${nodeID:0:6}${Font_Yello}${nodeISP}${Font_Suffix}|${Font_Green}${nodeLocation:0:24}${Font_SkyBlue}↑ ${Upload:0:10}${Font_Blue}↓ ${Download:0:10}${Font_Purple}${Relatency}${Font_Suffix}" && echo "${nodeID:0:6}${nodeISP}|${nodeLocation:0:24}↑ ${Upload:0:10}↓ ${Download:0:10}${Relatency}" >> ${LOG_FILE}
     else
         local cerror="ERROR"
     fi
