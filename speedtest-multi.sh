@@ -133,7 +133,7 @@ Menu() {
     
     if [[ ${selection} == 1 ]]; then
         Speedtest '' '默认' '本地'
-        Speedtest '44932' 'Cloudflare' '任播'
+        Speedtest '44932' '云耀斑' '任播'
         Test_CT;
         Test_CU;
         Test_CM;
